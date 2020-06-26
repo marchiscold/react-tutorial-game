@@ -67,28 +67,38 @@ class Game extends React.Component {
         squares: Array(9).fill(null)
       }],
       xIsNext: true,
+      stepNumber: 0,
     }
   }
 
   handleClick(i) {
-    let lastIndex = this.state.history.length - 1;
-    let squares = this.state.history[lastIndex].squares;
+    const newHistory = this.state.history.slice(0, this.state.stepNumber + 1);
+    let lastIndex = newHistory.length - 1;
+    let squares = newHistory[lastIndex].squares;
     if (squares[i] != null ||
         calculateWinner(squares)) {
       return;
     }
     
     const newSquares = [...squares];
-    const newHistory = [...this.state.history];
     newSquares[i] = this.state.xIsNext ? 'X' : 'O';
     newHistory.push({squares: newSquares});
     this.setState({ history: newHistory,
-                    xIsNext: !this.state.xIsNext });
+                    xIsNext: !this.state.xIsNext,
+                    stepNumber: newHistory.length - 1,
+                   });
+  }
+
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: step % 2 === 0,
+    });
   }
 
   render() {
     let history = this.state.history;
-    let current = history[history.length - 1];
+    let current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
     let status;
     if (winner) {
@@ -96,6 +106,19 @@ class Game extends React.Component {
     } else {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
     }
+
+    let moves = history.map((squares, index) => {
+      let desc = index ? 'move to move #' + index : 
+                         'move to start'; 
+      return (
+        <li key={index}>
+          <button onClick={ () => {this.jumpTo(index)}}>
+            {desc}
+          </button>
+        </li>
+      )                         
+    })
+
 
     return (
       <div className="game">
@@ -107,7 +130,9 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>History:</div>
-          <ol><HistoryButton /></ol>
+          <ol>
+            {moves}
+          </ol>
         </div>
       </div>
     );
