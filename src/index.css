@@ -32,6 +32,11 @@ ol, ul {
   width: 34px;
 }
 
+.square.square--winner {
+  background-color: #333;
+  color: #fff;
+}
+
 .square:focus {
   outline: none;
 }
